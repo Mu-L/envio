@@ -33,6 +33,12 @@ Some key features of `envio` include:
 
 Pre-built binaries are available on the [releases page](https://github.com/envio-cli/envio/releases).
 
+### Cargo
+
+```bash
+cargo install envio
+```
+
 ### Unix Install Script
 
 ```bash
@@ -42,7 +48,7 @@ curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.s
 You can set a custom install directory with `INSTALL_DIR`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh |INSTALL_DIR=/usr/local/bin bash
+curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | INSTALL_DIR=/usr/local/bin bash
 ```
 
 ### Linux
