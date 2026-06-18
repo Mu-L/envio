@@ -108,6 +108,16 @@ pub enum Command {
     },
 
     #[command(
+        name = "check",
+        about = "Check for expired and upcoming environment variables in a profile",
+        override_usage = "envio check <PROFILE_NAME>"
+    )]
+    Check {
+        #[arg(required = true, help = "name of the profile")]
+        profile_name: String,
+    },
+
+    #[command(
         name = "set",
         about = "Set or update environment variables in a profile",
         override_usage = "envio set <PROFILE_NAME> <ENVS>... [OPTIONS]"

@@ -19,6 +19,9 @@ _envio() {
             envio,add-key)
                 cmd="envio__add__key"
                 ;;
+            envio,check)
+                cmd="envio__check"
+                ;;
             envio,completion)
                 cmd="envio__completion"
                 ;;
@@ -80,7 +83,7 @@ _envio() {
 
     case "${cmd}" in
         envio)
-            opts="-h --diagnostic --help init create new delete remove list ls show set unset shell run import export add-key remove-key tui completion version"
+            opts="-h --diagnostic --help init create new delete remove list ls show check set unset shell run import export add-key remove-key tui completion version"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -94,6 +97,20 @@ _envio() {
             return 0
             ;;
         envio__add__key)
+            opts="-h --diagnostic --help <PROFILE_NAME>"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        envio__check)
             opts="-h --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )

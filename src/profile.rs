@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     cipher::{Cipher, CipherKind, EncryptedContent},
-    env::EnvMap,
+    env::{Env, EnvMap},
     error::Result,
     utils::save_serialized_profile,
 };
@@ -62,6 +62,10 @@ impl Profile {
             envs,
             cipher,
         }
+    }
+
+    pub fn expired_envs(&self) -> Vec<&Env> {
+        self.envs.iter().filter(|env| env.is_expired()).collect()
     }
 
     pub fn save(&mut self) -> Result<()> {

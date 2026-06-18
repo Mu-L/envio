@@ -30,6 +30,14 @@ impl Env {
     pub fn from_key_value(key: impl Into<String>, value: impl Into<String>) -> Self {
         Self::new(key, value, None, None)
     }
+
+    pub fn is_expired(&self) -> bool {
+        if let Some(date) = self.expiration_date {
+            date <= chrono::Local::now().date_naive()
+        } else {
+            false
+        }
+    }
 }
 
 #[derive(Default, Clone)]

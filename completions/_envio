@@ -119,6 +119,14 @@ _arguments "${_arguments_options[@]}" : \
 ':profile_name -- name of the profile:_default' \
 && ret=0
 ;;
+(check)
+_arguments "${_arguments_options[@]}" : \
+'--diagnostic[Show diagnostic information for bug reports]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':profile_name -- name of the profile:_default' \
+&& ret=0
+;;
 (set)
 _arguments "${_arguments_options[@]}" : \
 '-c[add comments to the provided environment variables]' \
@@ -236,6 +244,7 @@ _envio_commands() {
 'list:List all profiles' \
 'ls:List all profiles' \
 'show:Show environment variables in a profile' \
+'check:Check for expired and upcoming environment variables in a profile' \
 'set:Set or update environment variables in a profile' \
 'unset:Remove environment variables from a profile' \
 'shell:Spawn a new shell with environment variables loaded from the profile' \
@@ -254,6 +263,11 @@ _envio_commands() {
 _envio__add-key_commands() {
     local commands; commands=()
     _describe -t commands 'envio add-key commands' commands "$@"
+}
+(( $+functions[_envio__check_commands] )) ||
+_envio__check_commands() {
+    local commands; commands=()
+    _describe -t commands 'envio check commands' commands "$@"
 }
 (( $+functions[_envio__completion_commands] )) ||
 _envio__completion_commands() {

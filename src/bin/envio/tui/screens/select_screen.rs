@@ -166,7 +166,7 @@ impl SelectScreen {
         }
 
         self.profiles
-            .sort_by(|a, b| b.metadata.updated_at.cmp(&a.metadata.updated_at));
+            .sort_by_key(|b| std::cmp::Reverse(b.metadata.updated_at));
 
         Ok(())
     }

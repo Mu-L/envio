@@ -123,10 +123,11 @@ impl Screen for EditEnvsScreen {
                     self.delete_current();
                 }
 
-                KeyCode::Char('s') => {
-                    if key.modifiers.contains(KeyModifiers::CONTROL) || key.modifiers.is_empty() {
-                        self.save_changes()?;
-                    }
+                KeyCode::Char('s')
+                    if (key.modifiers.contains(KeyModifiers::CONTROL)
+                        || key.modifiers.is_empty()) =>
+                {
+                    self.save_changes()?;
                 }
 
                 _ => {}

@@ -62,6 +62,19 @@ where
     })
 }
 
+// Use `get_profile` when you just need the decrypted `Profile` data (e.g. to inspect,
+// display, or modify it). Use `load_profile` when you want its variables actually
+// injected into the current process's environment.
+//
+// ```ignore
+// // just need the data:
+// let profile = get_profile(path, key_provider)?;
+// println!("{}", profile.envs.len());
+//
+// // need it live in std::env (e.g. before spawning a child process):
+// let profile = load_profile(path, key_provider)?;
+// Command::new("npm").arg("run").arg("dev").status()?;
+// ```
 pub fn load_profile<P, F>(file_path: P, key_provider: Option<F>) -> Result<Profile>
 where
     P: AsRef<Path>,
@@ -71,6 +84,9 @@ where
     let profile = get_profile(file_path, key_provider)?;
 
     for env in &profile.envs {
+        if env.is_expired() {
+            continue;
+        }
         unsafe { std::env::set_var(&env.key, &env.value) };
     }
 

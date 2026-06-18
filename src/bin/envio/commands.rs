@@ -3,7 +3,7 @@ use std::{io::Read, path::Path};
 use chrono::Local;
 use colored::Colorize;
 use envio::{
-    Env, EnvMap,
+    Env, EnvMap, Profile,
     cipher::{CipherKind, create_cipher, gpg::get_gpg_keys},
     get_profile,
     profile::{ProfileMetadata, SerializedProfile},
@@ -20,8 +20,18 @@ use crate::{
     error::{AppError, AppResult},
     error_msg, ops, prompts, success_msg,
     tui::TuiApp,
-    utils,
+    utils, warning_msg,
 };
+
+fn get_profile_cli(profile_name: &str) -> AppResult<Profile> {
+    let profile = get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
+
+    for env in profile.expired_envs() {
+        warning_msg!("environment variable '{}' has expired", env.key);
+    }
+
+    Ok(profile)
+}
 
 fn get_userkey(meta: &ProfileMetadata) -> Zeroizing<String> {
     if let Ok(key) = std::env::var("ENVIO_KEY") {
@@ -279,10 +289,7 @@ impl ClapApp {
                 comments: add_comments,
                 expires: add_expires,
             } => {
-                let mut profile =
-                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
-
-                ops::check_expired_envs(&profile);
+                let mut profile = get_profile_cli(profile_name)?;
 
                 let mut set_envs = Vec::new();
 
@@ -350,10 +357,7 @@ impl ClapApp {
             }
 
             Command::Unset { profile_name, keys } => {
-                let mut profile =
-                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
-
-                ops::check_expired_envs(&profile);
+                let mut profile = get_profile_cli(profile_name)?;
 
                 for key in keys {
                     profile.envs.remove(key)?;
@@ -364,10 +368,7 @@ impl ClapApp {
             }
 
             Command::Shell { profile_name } => {
-                let profile =
-                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
-
-                ops::check_expired_envs(&profile);
+                let profile = get_profile_cli(profile_name)?;
 
                 #[cfg(target_family = "windows")]
                 let shell = { std::env::var("COMSPEC").unwrap_or_else(|_| "cmd.exe".to_string()) };
@@ -415,9 +416,7 @@ impl ClapApp {
                 let program = &command[0];
                 let args = &command[1..];
 
-                let profile =
-                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
-                ops::check_expired_envs(&profile);
+                let profile = get_profile_cli(profile_name)?;
 
                 let mut cmd = std::process::Command::new(program)
                     .envs::<IndexMap<String, String>, _, _>(profile.envs.into())
@@ -459,9 +458,7 @@ impl ClapApp {
                 show_comments,
                 show_expiration,
             } => {
-                let profile =
-                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
-                ops::check_expired_envs(&profile);
+                let profile = get_profile_cli(profile_name)?;
 
                 if *no_pretty_print {
                     for env in profile.envs {
@@ -472,15 +469,18 @@ impl ClapApp {
                 }
             }
 
+            Command::Check { profile_name } => {
+                let profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
+                ops::profile_expiry_table(&profile)?;
+            }
+
             Command::Export {
                 profile_name,
                 output_file_path,
                 keys,
             } => {
-                let profile =
-                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
-
-                ops::check_expired_envs(&profile);
+                let profile = get_profile_cli(profile_name)?;
 
                 let envs_selected = if keys.is_some() {
                     let keys_vec = keys.as_ref().unwrap();
