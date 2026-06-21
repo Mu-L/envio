@@ -85,14 +85,6 @@ impl<'a> DiagnosticReport<'a> {
             entry: DiagnosticEntry::Text(get_gnupg_version()?),
         });
 
-        #[cfg(target_family = "unix")]
-        {
-            sections.push(DiagnosticSection {
-                title: "GPGME",
-                entry: DiagnosticEntry::Text(get_gpgme_version()?),
-            });
-        }
-
         sections.push(DiagnosticSection {
             title: "Compile time information",
             entry: DiagnosticEntry::List(vec![
@@ -169,12 +161,6 @@ fn get_config_info() -> AppResult<Vec<DiagnosticEntry>> {
     )));
 
     Ok(info)
-}
-
-#[cfg(target_family = "unix")]
-fn get_gpgme_version() -> AppResult<String> {
-    let lib_version = gpgme::init().version();
-    Ok(format!("gpgme {}", lib_version))
 }
 
 fn get_gnupg_version() -> AppResult<String> {

@@ -1,9 +1,7 @@
 FROM rust:1.93.0-slim-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgpgme11-dev \
-    libgpg-error-dev \
-    pkg-config \
+    libdbus-1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -21,8 +19,7 @@ RUN touch src/bin/envio/main.rs && cargo build --release --locked
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgpgme11 \
-    libgpg-error0 \
+    gnupg \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

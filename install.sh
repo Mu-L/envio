@@ -159,71 +159,6 @@ download_and_install() {
     chmod +x "${INSTALL_DIR}/envio"
 }
 
-install_dependencies() {
-    local os
-    os=$(uname -s)
-
-    if [[ "$os" == "Darwin" ]]; then
-        command -v brew &>/dev/null || error "Homebrew (brew) is required to install dependencies on macOS. Please install Homebrew first."
-        info "Installing dependencies via brew..."
-        brew install gpgme
-        return
-    fi
-
-    [[ "$os" == "Linux" ]] || error "Unsupported operating system: $os"
-    [[ -f /etc/os-release ]] || error "Unable to identify Linux distribution (no /etc/os-release). Cannot install dependencies."
-    . /etc/os-release
-
-    declare -A PKGS=(
-        [apt]="libgpgme11 libgpg-error0"
-        [dnf]="gpgme libgpg-error"
-        [pacman]="gpgme"
-        [apk]="gpgme libgpg-error"
-        [zypper]="gpgme libgpg-error"
-    )
-
-    declare -A INSTALL_CMD=(
-        [apt]="apt-get update && apt-get install -y"
-        [dnf]="dnf install -y"
-        [pacman]="pacman -S --noconfirm --needed"
-        [apk]="apk add --no-cache"
-        [zypper]="zypper --non-interactive install"
-    )
-
-    local pkg_manager=""
-    resolve_pkg_manager() {
-        case "$1" in
-            ubuntu|debian|pop|mint|elementary) pkg_manager="apt" ;;
-            fedora|rhel|centos|rocky|almalinux) pkg_manager="dnf" ;;
-            arch|manjaro|endeavouros) pkg_manager="pacman" ;;
-            alpine) pkg_manager="apk" ;;
-            opensuse*|sles) pkg_manager="zypper" ;;
-            *) return 1 ;;
-        esac
-    }
-
-    if ! resolve_pkg_manager "${ID:-}"; then
-        for like in ${ID_LIKE:-}; do
-            resolve_pkg_manager "$like" && break
-        done
-    fi
-
-    [[ -n "$pkg_manager" ]] || error "Unsupported Linux distribution: ${NAME:-Unknown}. Cannot install dependencies."
-
-    local pkg_name="${PKGS[$pkg_manager]}"
-    local install_cmd="${INSTALL_CMD[$pkg_manager]} $pkg_name"
-
-    info "Installing $pkg_name via $pkg_manager..."
-
-    local sudo_cmd=""
-    if [[ $EUID -ne 0 ]]; then
-        command -v sudo &>/dev/null || error "Root privileges are required to install dependencies. Please run this script as root or install sudo."
-        sudo_cmd="sudo"
-    fi
-
-    eval "$sudo_cmd $install_cmd"
-}
-
 if [[ "${1:-}" == "uninstall" || "${1:-}" == "--uninstall" ]]; then
     uninstall
     exit 0
@@ -235,8 +170,11 @@ info "Detecting platform..."
 target=$(detect_target)
 info "Detected target: ${target}"
 
-info "Installing dependencies..."
-install_dependencies
+if command -v gpg &>/dev/null; then
+    info "gpg already installed ($(gpg --version | head -1))"
+else
+    warn "note: gpg was not found on your system. Please install it if you plan to use gpg encryption"
+fi
 
 is_upgrade=false
 

@@ -44,8 +44,8 @@ jobs:
           components: clippy, rustfmt
       - name: Run cargo fmt
         run: cargo fmt -- --check
-      - name: Install libgpgme-dev and libgpg-error-dev
-        run: sudo apt-get update -y && sudo apt-get install -y libgpgme-dev libgpg-error-dev libdbus-1-dev
+      - name: Install libdbus-1-dev
+        run: sudo apt-get update -y && sudo apt-get install -y libdbus-1-dev
       - name: Run clippy (on minimum supported rust version to prevent warnings we can't fix)
         run: cargo clippy --locked --all-targets ${{ env.MSRV_FEATURES }}
       - name: Run tests
@@ -128,23 +128,6 @@ jobs:
         shell: bash
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
-
-      - name: Install brew (MacOS)
-        shell: bash
-        if: startsWith(matrix.job.os, 'mac')
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-      - name: Install gnupg gpgme pkg-config (MacOS)
-        shell: bash
-        if: startsWith(matrix.job.os, 'mac')
-        run: |
-          brew install gnupg
-          brew install gpgme
-          brew install pkg-config
-          pkg-config --version
-          pkg-config --variable pc_path pkg-config
-          echo $PKG_CONFIG_PATH
 
       - name: Overwrite build command env variable
         if: matrix.job.use-cross

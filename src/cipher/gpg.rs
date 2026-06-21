@@ -1,15 +1,7 @@
 use std::any::Any;
-#[cfg(target_family = "windows")]
-use std::collections::VecDeque;
-#[cfg(target_family = "windows")]
 use std::io::Write;
-#[cfg(target_family = "windows")]
 use std::process::{Command, Stdio};
 
-#[cfg(target_family = "unix")]
-use gpgme::{Context, Data, Protocol};
-#[cfg(target_family = "windows")]
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -17,6 +9,16 @@ use crate::{
     cipher::{Cipher, CipherKind, EncryptedContent},
     error::{Error, Result},
 };
+
+fn check_gpg() -> Result<()> {
+    match Command::new("gpg").arg("--version").output() {
+        Ok(_) => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Err(Error::Cipher(
+            "gpg not found, please install it on your system".to_string(),
+        )),
+        Err(e) => Err(Error::Cipher(format!("failed to probe gpg: {e}"))),
+    }
+}
 
 #[derive(Serialize, Deserialize, Default, Clone)]
 struct Metadata {
@@ -50,110 +52,73 @@ impl Cipher for GPG {
     }
 
     fn encrypt(&mut self, envs: &EnvMap) -> Result<EncryptedContent> {
+        check_gpg()?;
+
         let data = envs.as_bytes()?;
 
-        let mut encrypted_data = Vec::new();
+        let mut gpg_process = Command::new("gpg")
+            .arg("--recipient")
+            .arg(&self.metadata.key_fingerprint)
+            .arg("--encrypt")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .map_err(|e| Error::Cipher(format!("failed to spawn gpg: {e}")))?;
 
-        #[cfg(target_family = "unix")]
-        {
-            let mut ctx = match Context::from_protocol(Protocol::OpenPgp) {
-                Ok(ctx) => ctx,
-                Err(e) => {
-                    return Err(Error::Cipher(e.to_string()));
-                }
-            };
+        let stdin = match gpg_process.stdin.as_mut() {
+            Some(stdin) => stdin,
+            None => {
+                return Err(Error::Io(std::io::Error::other("failed to open stdin")));
+            }
+        };
 
-            let key = match ctx.get_key(&self.metadata.key_fingerprint) {
-                Ok(key) => key,
-                Err(e) => {
-                    return Err(Error::Cipher(e.to_string()));
-                }
-            };
+        stdin.write_all(&data)?;
 
-            if let Err(e) = ctx.encrypt(Some(&key), data, &mut encrypted_data) {
-                return Err(Error::Cipher(e.to_string()));
-            };
+        let output = gpg_process.wait_with_output()?;
+
+        if !output.status.success() {
+            return Err(Error::Cipher(format!(
+                "gpg encrypt failed (exit {})",
+                output.status
+            )));
         }
 
-        #[cfg(target_family = "windows")]
-        {
-            let mut gpg_process = Command::new("gpg")
-                .arg("--recipient")
-                .arg(&self.metadata.key_fingerprint)
-                .arg("--encrypt")
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .spawn()?;
-
-            let stdin = match gpg_process.stdin.as_mut() {
-                Some(stdin) => stdin,
-                None => {
-                    return Err(Error::Io(std::io::Error::new(
-                        std::io::ErrorKind::Other,
-                        "failed to open stdin",
-                    )));
-                }
-            };
-
-            stdin.write_all(&data)?;
-
-            // Wait for the GPG process to finish and capture its output
-            let output = gpg_process.wait_with_output()?;
-
-            encrypted_data.extend_from_slice(&output.stdout);
-        }
-
-        Ok(EncryptedContent::Bytes(encrypted_data))
+        Ok(EncryptedContent::Bytes(output.stdout))
     }
 
     fn decrypt(&self, encrypted_data: &EncryptedContent) -> Result<EnvMap> {
-        #[cfg(target_family = "unix")]
-        {
-            let mut ctx = match Context::from_protocol(Protocol::OpenPgp) {
-                Ok(ctx) => ctx,
-                Err(e) => {
-                    return Err(Error::Cipher(e.to_string()));
-                }
-            };
+        check_gpg()?;
 
-            let mut cipher = match Data::from_bytes(encrypted_data.as_bytes()?) {
-                Ok(cipher) => cipher,
-                Err(e) => {
-                    return Err(Error::Cipher(e.to_string()));
-                }
-            };
+        let mut gpg_process = Command::new("gpg")
+            .arg("--yes")
+            .arg("--quiet")
+            .arg("--decrypt")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .map_err(|e| Error::Cipher(format!("failed to spawn gpg: {e}")))?;
 
-            let mut plain = Vec::new();
-            if let Err(e) = ctx.decrypt_and_verify(&mut cipher, &mut plain) {
-                return Err(Error::Cipher(e.to_string()));
-            };
+        let stdin = match gpg_process.stdin.as_mut() {
+            Some(stdin) => stdin,
+            None => {
+                return Err(Error::Msg("failed to open stdin".to_string()));
+            }
+        };
 
-            Ok(plain.into())
+        stdin.write_all(&encrypted_data.as_bytes()?)?;
+
+        let output = gpg_process.wait_with_output()?;
+
+        if !output.status.success() {
+            return Err(Error::Cipher(format!(
+                "gpg decrypt failed (exit {})",
+                output.status
+            )));
         }
 
-        #[cfg(target_family = "windows")]
-        {
-            let mut gpg_process = Command::new("gpg")
-                .arg("--yes")
-                .arg("--quiet")
-                .arg("--decrypt")
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .spawn()?;
-
-            let stdin = match gpg_process.stdin.as_mut() {
-                Some(stdin) => stdin,
-                None => {
-                    return Err(Error::Msg("failed to open stdin".to_string()));
-                }
-            };
-
-            stdin.write_all(&encrypted_data.as_bytes()?)?;
-
-            let output = gpg_process.wait_with_output()?;
-
-            Ok(output.stdout.into())
-        }
+        Ok(output.stdout.into())
     }
 
     fn export_metadata(&self) -> Option<serde_json::Value> {
@@ -175,118 +140,63 @@ impl Cipher for GPG {
     }
 }
 
-#[cfg(target_family = "unix")]
 pub fn get_gpg_keys() -> Result<Vec<(String, String)>> {
-    let mut context = Context::from_protocol(Protocol::OpenPgp).unwrap();
-    let mut available_keys: Vec<(String, String)> = Vec::new();
+    check_gpg()?;
 
-    let keys = match context.keys() {
-        Ok(keys) => keys,
-        Err(e) => {
-            return Err(Error::Cipher(e.to_string()));
-        }
-    };
-
-    for key in keys.flatten() {
-        if let Some(user_id) = key.user_ids().next() {
-            let name = match user_id.name() {
-                Ok(name) => name,
-                Err(e) => {
-                    if e.is_none() {
-                        return Err(Error::Cipher("Failed to get name from user id".to_string()));
-                    }
-
-                    return Err(Error::Utf8Error(e.unwrap()));
-                }
-            };
-
-            let email = match user_id.email() {
-                Ok(email) => email,
-                Err(e) => {
-                    return Err(Error::Utf8Error(e.unwrap()));
-                }
-            };
-
-            let key_fingerprint = match key.fingerprint() {
-                Ok(fingerprint) => fingerprint.to_string(),
-                Err(e) => {
-                    return Err(Error::Utf8Error(e.unwrap()));
-                }
-            };
-
-            available_keys.push((format!("{} <{}>", name, email), key_fingerprint));
-        }
-    }
-
-    Ok(available_keys)
-}
-
-#[cfg(target_family = "windows")]
-pub fn get_gpg_keys() -> Result<Vec<(String, String)>> {
     let output = Command::new("gpg")
-        .args(["--list-keys", "--keyid-format", "LONG"])
+        .args(["--list-keys", "--with-colons"])
         .output()
-        .map_err(|_| Error::Msg("Failed to execute GPG command".to_string()))?;
+        .map_err(|e| Error::Cipher(format!("failed to execute gpg: {e}")))?;
+
+    if !output.status.success() {
+        return Err(Error::Cipher(format!(
+            "gpg --list-keys failed (exit {})",
+            output.status
+        )));
+    }
 
     let stdout = String::from_utf8(output.stdout)
-        .map_err(|_| Error::Msg("Failed to parse GPG output as UTF-8".to_string()))?;
+        .map_err(|_| Error::Msg("failed to parse GPG output as UTF-8".to_string()))?;
 
-    if stdout.trim().is_empty() {
-        return Ok(vec![]);
-    }
+    let mut available_keys: Vec<(String, String)> = Vec::new();
+    let mut current_fingerprint: Option<String> = None;
+    let mut current_uid: Option<String> = None;
 
-    let mut lines: VecDeque<_> = stdout.lines().collect();
+    for line in stdout.lines() {
+        let fields: Vec<&str> = line.split(':').collect();
 
-    lines.pop_front(); // remove first line
-    if let Some(line) = lines.pop_front() {
-        if line.bytes().filter(|&b| b != b'-').take(1).count() > 0 {
-            return Err(Error::Msg("Unexpected GPG output format".to_string()));
-        }
-    }
-
-    let re_fingerprint = Regex::new(r"^[0-9A-F]{16,}$").unwrap();
-    let re_user_id = Regex::new(r"^uid\s*\[[a-z ]+\]\s*(.*)$").unwrap();
-
-    let mut available_keys = Vec::new();
-
-    while !lines.is_empty() {
-        let line = lines.pop_front().unwrap();
-        if line.starts_with("pub ") || line.starts_with("sec ") {
-            let fingerprint_line = lines
-                .pop_front()
-                .ok_or_else(|| Error::Msg("Missing fingerprint".to_string()))?;
-            let fingerprint = format_fingerprint(fingerprint_line.trim());
-
-            if !re_fingerprint.is_match(&fingerprint) {
-                return Err(Error::Msg("Invalid fingerprint format".to_string()));
-            }
-
-            let mut user_ids = Vec::new();
-            while let Some(uid_line) = lines.front() {
-                if uid_line.starts_with("uid ") {
-                    let uid_line = lines.pop_front().unwrap();
-                    let captures = re_user_id
-                        .captures(&uid_line)
-                        .ok_or_else(|| Error::Msg("Failed to parse user ID".to_string()))?;
-                    user_ids.push(captures[1].to_string());
-                } else if uid_line.trim().is_empty() {
-                    lines.pop_front();
-                    break;
-                } else {
-                    break;
+        match fields.first().copied() {
+            Some("pub") | Some("sec") => {
+                if let (Some(fp), Some(uid)) = (current_fingerprint.take(), current_uid.take()) {
+                    available_keys.push((uid, fp));
                 }
             }
 
-            if let Some(first_user) = user_ids.get(0) {
-                available_keys.push((first_user.clone(), fingerprint));
+            Some("fpr") => {
+                if current_fingerprint.is_none()
+                    && let Some(&fp) = fields.get(9)
+                    && !fp.is_empty()
+                {
+                    current_fingerprint = Some(fp.to_string());
+                }
             }
+
+            Some("uid") => {
+                if current_uid.is_none()
+                    && let Some(&uid) = fields.get(9)
+                    && !uid.is_empty()
+                {
+                    current_uid = Some(uid.to_string());
+                }
+            }
+
+            _ => {}
         }
     }
 
-    Ok(available_keys)
-}
+    if let (Some(fp), Some(uid)) = (current_fingerprint, current_uid) {
+        available_keys.push((uid, fp));
+    }
 
-#[cfg(target_family = "windows")]
-fn format_fingerprint<S: AsRef<str>>(fingerprint: S) -> String {
-    fingerprint.as_ref().trim().to_uppercase()
+    Ok(available_keys)
 }
