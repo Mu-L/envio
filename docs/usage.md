@@ -236,6 +236,18 @@ envio unset <PROFILE_NAME> API_KEY
 envio unset <PROFILE_NAME> API_KEY DATABASE_URL
 ```
 
+### Checking Variable Expiry
+
+To check for expired or upcoming environment variables in a profile, use the `check` command:
+
+```bash
+envio check <PROFILE_NAME>
+```
+
+This will display a table of variables, their expiration status, and the remaining time.
+
+Additionally, whenever a profile is loaded or accessed (such as with `show`, `shell`, `run`, etc.), `envio` will automatically print warning messages for any environment variables that have already expired.
+
 ### Using Profiles
 
 #### Starting a Profile Shell
