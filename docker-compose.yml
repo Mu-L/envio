@@ -1,0 +1,8 @@
+services:
+  envio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: envio:latest
+    container_name: envio
+    working_dir: /app
