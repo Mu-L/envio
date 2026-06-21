@@ -15,7 +15,7 @@
 set -euo pipefail
 
 REPO="humblepenguinn/envio"
-INSTALL_DIR="${ENVIO_INSTALL_DIR:-${INSTALL_DIR:-$HOME/.local/bin}}"
+INSTALL_DIR="${ENVIO_INSTALL_DIR:-$HOME/.local/bin}"
 
 COLOR_OFF=''
 COLOR_RED=''

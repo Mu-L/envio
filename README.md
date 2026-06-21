@@ -31,50 +31,47 @@ Some key features of `envio` include:
 
 ## Installation
 
-Pre-built binaries are available on the [releases page](https://github.com/envio-cli/envio/releases).
+Pre-built binaries for Linux, macOS, and Windows are available on the [releases page](https://github.com/humblepenguinn/envio/releases).
 
+### Unix Install Script
+```bash
+curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash
+```
+Set a custom install directory with `ENVIO_INSTALL_DIR` (default: `~/.local/bin`):
+```bash
+curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | ENVIO_INSTALL_DIR=/usr/local/bin bash
+```
+Install a specific version with `ENVIO_VERSION` (default: latest):
+```bash
+curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | ENVIO_VERSION=v0.0.0 bash
+```
+Uninstall:
+```bash
+curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash -s -- uninstall
+```
 ### Cargo
-
 ```bash
 cargo install envio
 ```
 
-### Unix Install Script
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash
-```
-
-You can set a custom install directory with `INSTALL_DIR`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | INSTALL_DIR=/usr/local/bin bash
-```
-
-### Linux
-
-**Arch Linux**
-
-Use your favorite AUR helper to install `envio`:
-
+### Arch Linux
+Use your favorite AUR helper:
 ```bash
 paru -S envio      # or envio-bin for pre-built binary
 ```
 
-**Debian/Ubuntu**
-
+### Debian/Ubuntu
+A `.deb` package is also published on the [releases page](https://github.com/envio-cli/envio/releases):
 ```bash
 sudo dpkg -i envio_<version>_<arch>.deb
 ```
 
 ### macOS
-
 ```bash
 brew install envio
 ```
 
 ### Windows
-
 Download the MSI installer or zip archive from the [releases page](https://github.com/envio-cli/envio/releases).
 
 ## Usage

@@ -10,7 +10,7 @@
 
 2. **Install dependencies (Unix only):**
 
-   Ensure `gpgme` (version 1.13 or later) and its development files are installed.
+   Ensure the `gpg` CLI tool (GnuPG) is installed.
 
 3. **Clone the repository:**
 
