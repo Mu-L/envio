@@ -259,88 +259,88 @@ _envio_commands() {
     )
     _describe -t commands 'envio commands' commands "$@"
 }
-(( $+functions[_envio__add-key_commands] )) ||
-_envio__add-key_commands() {
+(( $+functions[_envio__subcmd__add-key_commands] )) ||
+_envio__subcmd__add-key_commands() {
     local commands; commands=()
     _describe -t commands 'envio add-key commands' commands "$@"
 }
-(( $+functions[_envio__check_commands] )) ||
-_envio__check_commands() {
+(( $+functions[_envio__subcmd__check_commands] )) ||
+_envio__subcmd__check_commands() {
     local commands; commands=()
     _describe -t commands 'envio check commands' commands "$@"
 }
-(( $+functions[_envio__completion_commands] )) ||
-_envio__completion_commands() {
+(( $+functions[_envio__subcmd__completion_commands] )) ||
+_envio__subcmd__completion_commands() {
     local commands; commands=()
     _describe -t commands 'envio completion commands' commands "$@"
 }
-(( $+functions[_envio__create_commands] )) ||
-_envio__create_commands() {
+(( $+functions[_envio__subcmd__create_commands] )) ||
+_envio__subcmd__create_commands() {
     local commands; commands=()
     _describe -t commands 'envio create commands' commands "$@"
 }
-(( $+functions[_envio__delete_commands] )) ||
-_envio__delete_commands() {
+(( $+functions[_envio__subcmd__delete_commands] )) ||
+_envio__subcmd__delete_commands() {
     local commands; commands=()
     _describe -t commands 'envio delete commands' commands "$@"
 }
-(( $+functions[_envio__export_commands] )) ||
-_envio__export_commands() {
+(( $+functions[_envio__subcmd__export_commands] )) ||
+_envio__subcmd__export_commands() {
     local commands; commands=()
     _describe -t commands 'envio export commands' commands "$@"
 }
-(( $+functions[_envio__import_commands] )) ||
-_envio__import_commands() {
+(( $+functions[_envio__subcmd__import_commands] )) ||
+_envio__subcmd__import_commands() {
     local commands; commands=()
     _describe -t commands 'envio import commands' commands "$@"
 }
-(( $+functions[_envio__init_commands] )) ||
-_envio__init_commands() {
+(( $+functions[_envio__subcmd__init_commands] )) ||
+_envio__subcmd__init_commands() {
     local commands; commands=()
     _describe -t commands 'envio init commands' commands "$@"
 }
-(( $+functions[_envio__list_commands] )) ||
-_envio__list_commands() {
+(( $+functions[_envio__subcmd__list_commands] )) ||
+_envio__subcmd__list_commands() {
     local commands; commands=()
     _describe -t commands 'envio list commands' commands "$@"
 }
-(( $+functions[_envio__remove-key_commands] )) ||
-_envio__remove-key_commands() {
+(( $+functions[_envio__subcmd__remove-key_commands] )) ||
+_envio__subcmd__remove-key_commands() {
     local commands; commands=()
     _describe -t commands 'envio remove-key commands' commands "$@"
 }
-(( $+functions[_envio__run_commands] )) ||
-_envio__run_commands() {
+(( $+functions[_envio__subcmd__run_commands] )) ||
+_envio__subcmd__run_commands() {
     local commands; commands=()
     _describe -t commands 'envio run commands' commands "$@"
 }
-(( $+functions[_envio__set_commands] )) ||
-_envio__set_commands() {
+(( $+functions[_envio__subcmd__set_commands] )) ||
+_envio__subcmd__set_commands() {
     local commands; commands=()
     _describe -t commands 'envio set commands' commands "$@"
 }
-(( $+functions[_envio__shell_commands] )) ||
-_envio__shell_commands() {
+(( $+functions[_envio__subcmd__shell_commands] )) ||
+_envio__subcmd__shell_commands() {
     local commands; commands=()
     _describe -t commands 'envio shell commands' commands "$@"
 }
-(( $+functions[_envio__show_commands] )) ||
-_envio__show_commands() {
+(( $+functions[_envio__subcmd__show_commands] )) ||
+_envio__subcmd__show_commands() {
     local commands; commands=()
     _describe -t commands 'envio show commands' commands "$@"
 }
-(( $+functions[_envio__tui_commands] )) ||
-_envio__tui_commands() {
+(( $+functions[_envio__subcmd__tui_commands] )) ||
+_envio__subcmd__tui_commands() {
     local commands; commands=()
     _describe -t commands 'envio tui commands' commands "$@"
 }
-(( $+functions[_envio__unset_commands] )) ||
-_envio__unset_commands() {
+(( $+functions[_envio__subcmd__unset_commands] )) ||
+_envio__subcmd__unset_commands() {
     local commands; commands=()
     _describe -t commands 'envio unset commands' commands "$@"
 }
-(( $+functions[_envio__version_commands] )) ||
-_envio__version_commands() {
+(( $+functions[_envio__subcmd__version_commands] )) ||
+_envio__subcmd__version_commands() {
     local commands; commands=()
     _describe -t commands 'envio version commands' commands "$@"
 }

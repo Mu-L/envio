@@ -17,64 +17,64 @@ _envio() {
                 cmd="envio"
                 ;;
             envio,add-key)
-                cmd="envio__add__key"
+                cmd="envio__subcmd__add__subcmd__key"
                 ;;
             envio,check)
-                cmd="envio__check"
+                cmd="envio__subcmd__check"
                 ;;
             envio,completion)
-                cmd="envio__completion"
+                cmd="envio__subcmd__completion"
                 ;;
             envio,create)
-                cmd="envio__create"
+                cmd="envio__subcmd__create"
                 ;;
             envio,delete)
-                cmd="envio__delete"
+                cmd="envio__subcmd__delete"
                 ;;
             envio,export)
-                cmd="envio__export"
+                cmd="envio__subcmd__export"
                 ;;
             envio,import)
-                cmd="envio__import"
+                cmd="envio__subcmd__import"
                 ;;
             envio,init)
-                cmd="envio__init"
+                cmd="envio__subcmd__init"
                 ;;
             envio,list)
-                cmd="envio__list"
+                cmd="envio__subcmd__list"
                 ;;
             envio,ls)
-                cmd="envio__list"
+                cmd="envio__subcmd__list"
                 ;;
             envio,new)
-                cmd="envio__create"
+                cmd="envio__subcmd__create"
                 ;;
             envio,remove)
-                cmd="envio__delete"
+                cmd="envio__subcmd__delete"
                 ;;
             envio,remove-key)
-                cmd="envio__remove__key"
+                cmd="envio__subcmd__remove__subcmd__key"
                 ;;
             envio,run)
-                cmd="envio__run"
+                cmd="envio__subcmd__run"
                 ;;
             envio,set)
-                cmd="envio__set"
+                cmd="envio__subcmd__set"
                 ;;
             envio,shell)
-                cmd="envio__shell"
+                cmd="envio__subcmd__shell"
                 ;;
             envio,show)
-                cmd="envio__show"
+                cmd="envio__subcmd__show"
                 ;;
             envio,tui)
-                cmd="envio__tui"
+                cmd="envio__subcmd__tui"
                 ;;
             envio,unset)
-                cmd="envio__unset"
+                cmd="envio__subcmd__unset"
                 ;;
             envio,version)
-                cmd="envio__version"
+                cmd="envio__subcmd__version"
                 ;;
             *)
                 ;;
@@ -96,7 +96,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__add__key)
+        envio__subcmd__add__subcmd__key)
             opts="-h --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -110,7 +110,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__check)
+        envio__subcmd__check)
             opts="-h --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -124,7 +124,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__completion)
+        envio__subcmd__completion)
             opts="-h --diagnostic --help bash zsh fish powershell"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -138,7 +138,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__create)
+        envio__subcmd__create)
             opts="-d -f -e -k -c -x -h --description --from-file --envs --cipher-kind --comments --expires --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -184,7 +184,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__delete)
+        envio__subcmd__delete)
             opts="-h --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -198,7 +198,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__export)
+        envio__subcmd__export)
             opts="-o -k -h --output-file-path --keys --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -228,7 +228,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__import)
+        envio__subcmd__import)
             opts="-n -h --profile-name --diagnostic --help <SOURCE>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -250,7 +250,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__init)
+        envio__subcmd__init)
             opts="-h --diagnostic --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -264,7 +264,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__list)
+        envio__subcmd__list)
             opts="-h --no-pretty-print --diagnostic --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -278,7 +278,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__remove__key)
+        envio__subcmd__remove__subcmd__key)
             opts="-h --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -292,7 +292,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__run)
+        envio__subcmd__run)
             opts="-h --diagnostic --help <PROFILE_NAME> <COMMAND>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -306,7 +306,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__set)
+        envio__subcmd__set)
             opts="-c -x -h --comments --expires --diagnostic --help <PROFILE_NAME> <ENVS>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -320,7 +320,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__shell)
+        envio__subcmd__shell)
             opts="-h --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -334,7 +334,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__show)
+        envio__subcmd__show)
             opts="-c -x -h --show-comments --show-expiration --no-pretty-print --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -348,7 +348,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__tui)
+        envio__subcmd__tui)
             opts="-h --diagnostic --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -362,7 +362,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__unset)
+        envio__subcmd__unset)
             opts="-h --diagnostic --help <PROFILE_NAME> <KEYS>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -376,7 +376,7 @@ _envio() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        envio__version)
+        envio__subcmd__version)
             opts="-v -h --verbose --diagnostic --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
