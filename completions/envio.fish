@@ -96,6 +96,10 @@ complete -c envio -n "__fish_envio_using_subcommand import" -l diagnostic -d 'Sh
 complete -c envio -n "__fish_envio_using_subcommand import" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand export" -s o -l output-file-path -d 'output file path (default: .env)' -r
 complete -c envio -n "__fish_envio_using_subcommand export" -s k -l keys -d 'comma-separated list of keys to export (type \'select\' to choose interactively)' -r
+complete -c envio -n "__fish_envio_using_subcommand export" -s f -l format -d 'output format (dotenv, json, yaml, shell)' -r -f -a "dotenv\t''
+json\t''
+yaml\t''
+shell\t''"
 complete -c envio -n "__fish_envio_using_subcommand export" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand export" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand add-key" -l diagnostic -d 'Show diagnostic information for bug reports'

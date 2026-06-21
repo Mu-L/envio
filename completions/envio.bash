@@ -199,7 +199,7 @@ _envio() {
             return 0
             ;;
         envio__subcmd__export)
-            opts="-o -k -h --output-file-path --keys --diagnostic --help <PROFILE_NAME>"
+            opts="-o -k -f -h --output-file-path --keys --format --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -219,6 +219,14 @@ _envio() {
                     ;;
                 -k)
                     COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --format)
+                    COMPREPLY=($(compgen -W "dotenv json yaml shell" -- "${cur}"))
+                    return 0
+                    ;;
+                -f)
+                    COMPREPLY=($(compgen -W "dotenv json yaml shell" -- "${cur}"))
                     return 0
                     ;;
                 *)

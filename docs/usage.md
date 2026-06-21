@@ -321,6 +321,22 @@ Interactively select which variables to export:
 envio export <PROFILE_NAME> -k select
 ```
 
+#### Export Formats
+
+By default, profiles are exported to a `.env` file using the `dotenv` format. You can specify a different format using the `-f` or `--format` flag:
+
+```bash
+envio export <PROFILE_NAME> -f json
+envio export <PROFILE_NAME> -f yaml
+envio export <PROFILE_NAME> -f shell
+```
+
+Supported formats:
+- `dotenv` (default): Exports in `KEY=VALUE` format. If output file path is not specified, defaults to `.env`.
+- `json`: Exports in standard JSON structure. If output file path is not specified, defaults to `<PROFILE_NAME>.json`.
+- `yaml`: Exports in standard YAML structure. If output file path is not specified, defaults to `<PROFILE_NAME>.yaml`.
+- `shell`: Exports as shell `export KEY="VALUE"` commands. If output file path is not specified, defaults to `<PROFILE_NAME>.sh`.
+
 ### Deleting Profiles
 
 Remove a profile permanently:

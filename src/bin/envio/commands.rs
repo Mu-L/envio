@@ -479,6 +479,7 @@ impl ClapApp {
                 profile_name,
                 output_file_path,
                 keys,
+                format,
             } => {
                 let profile = get_profile_cli(profile_name)?;
 
@@ -502,8 +503,14 @@ impl ClapApp {
                     None
                 };
 
-                let output_file_path = output_file_path.as_deref().unwrap_or(".env");
-                ops::export_envs(&profile, output_file_path, &envs_selected)?;
+                let default_file = match format.as_str() {
+                    "json" => format!("{}.json", profile_name),
+                    "yaml" => format!("{}.yaml", profile_name),
+                    "shell" => format!("{}.sh", profile_name),
+                    _ => ".env".to_string(),
+                };
+                let output_file_path = output_file_path.as_deref().unwrap_or(&default_file);
+                ops::export_envs(&profile, output_file_path, &envs_selected, format)?;
 
                 success_msg!("Exported envs to {}", output_file_path);
             }

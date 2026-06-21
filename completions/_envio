@@ -182,6 +182,8 @@ _arguments "${_arguments_options[@]}" : \
 '--output-file-path=[output file path (default\: .env)]:OUTPUT_FILE_PATH:_default' \
 '*-k+[comma-separated list of keys to export (type '\''select'\'' to choose interactively)]:KEYS:_default' \
 '*--keys=[comma-separated list of keys to export (type '\''select'\'' to choose interactively)]:KEYS:_default' \
+'-f+[output format (dotenv, json, yaml, shell)]:FORMAT:(dotenv json yaml shell)' \
+'--format=[output format (dotenv, json, yaml, shell)]:FORMAT:(dotenv json yaml shell)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \

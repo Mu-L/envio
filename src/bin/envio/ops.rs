@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     io::{Read, Write},
     path::{Path, PathBuf},
 };
@@ -7,6 +8,7 @@ use chrono::Local;
 use colored::Colorize;
 use comfy_table::{Attribute, Cell, Color, ContentArrangement, Table};
 use envio::{EnvMap, Profile, cipher::Cipher};
+use indexmap::IndexMap;
 
 use crate::{
     config::{
@@ -39,6 +41,7 @@ pub fn export_envs(
     profile: &Profile,
     output_file_path: &str,
     envs_selected: &Option<Vec<String>>,
+    format: &str,
 ) -> AppResult<()> {
     let path = if contains_path_separator(output_file_path) {
         PathBuf::from(output_file_path)
@@ -68,8 +71,37 @@ pub fn export_envs(
         return Err(AppError::Msg("No envs to export".to_string()));
     }
 
-    for env in envs_to_export {
-        writeln!(file, "{}={}", env.key, env.value)?;
+    let map: IndexMap<_, _> = envs_to_export
+        .iter()
+        .map(|e| (e.key.clone(), e.value.clone()))
+        .collect();
+
+    match format {
+        "json" => {
+            let json = serde_json::to_string_pretty(&map)?;
+            file.write_all(json.as_bytes())?;
+        }
+
+        "yaml" => {
+            serde_yaml::to_writer(file, &map)?;
+        }
+
+        "shell" => {
+            for (k, v) in &map {
+                writeln!(
+                    file,
+                    "export {}={}",
+                    k,
+                    shell_escape::escape(Cow::Borrowed(v))
+                )?;
+            }
+        }
+
+        _ => {
+            for (k, v) in &map {
+                writeln!(file, "{}={}", k, v)?;
+            }
+        }
     }
 
     Ok(())

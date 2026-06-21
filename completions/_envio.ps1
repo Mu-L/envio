@@ -172,6 +172,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('--output-file-path', '--output-file-path', [CompletionResultType]::ParameterName, 'output file path (default: .env)')
             [CompletionResult]::new('-k', '-k', [CompletionResultType]::ParameterName, 'comma-separated list of keys to export (type ''select'' to choose interactively)')
             [CompletionResult]::new('--keys', '--keys', [CompletionResultType]::ParameterName, 'comma-separated list of keys to export (type ''select'' to choose interactively)')
+            [CompletionResult]::new('-f', '-f', [CompletionResultType]::ParameterName, 'output format (dotenv, json, yaml, shell)')
+            [CompletionResult]::new('--format', '--format', [CompletionResultType]::ParameterName, 'output format (dotenv, json, yaml, shell)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')

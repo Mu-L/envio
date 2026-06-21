@@ -213,6 +213,14 @@ pub enum Command {
             help = "comma-separated list of keys to export (type 'select' to choose interactively)"
         )]
         keys: Option<Vec<String>>,
+        #[arg(
+            long = "format",
+            short = 'f',
+            default_value = "dotenv",
+            value_parser = ["dotenv", "json", "yaml", "shell"],
+            help = "output format (dotenv, json, yaml, shell)"
+        )]
+        format: String,
     },
 
     #[command(
