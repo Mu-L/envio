@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 #
-# Install the envio CLI on Linux or macOS.
+# Install (or uninstall) the envio CLI on Linux or macOS.
 #
+# Install:
 #   curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash
+#
+# Uninstall:
+#   curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash -s -- uninstall
 #
 # Environment overrides:
 #   ENVIO_VERSION      tag/version to install - default: latest.
@@ -33,20 +37,30 @@ error() {
 }
 
 info() {
-    echo -e "${COLOR_DIM}$@${COLOR_OFF}"
+    echo -e "${COLOR_DIM}$*${COLOR_OFF}"
 }
 
 success() {
-    echo -e "${COLOR_GREEN}$@${COLOR_OFF}"
+    echo -e "${COLOR_GREEN}$*${COLOR_OFF}"
 }
 
 warn() {
-    echo -e "${COLOR_YELLOW}$@${COLOR_OFF}"
+    echo -e "${COLOR_YELLOW}$*${COLOR_OFF}"
+}
+
+uninstall() {
+    if [[ -f "${INSTALL_DIR}/envio" ]]; then
+        info "Uninstalling envio from ${INSTALL_DIR}..."
+        rm -f "${INSTALL_DIR}/envio"
+        success "envio uninstalled successfully!"
+    else
+        info "envio is not installed in ${INSTALL_DIR}."
+    fi
 }
 
 detect_target() {
     local os arch
-    
+
     os=$(uname -s)
     arch=$(uname -m)
 
@@ -210,6 +224,11 @@ install_dependencies() {
     eval "$sudo_cmd $install_cmd"
 }
 
+if [[ "${1:-}" == "uninstall" || "${1:-}" == "--uninstall" ]]; then
+    uninstall
+    exit 0
+fi
+
 mkdir -p "$INSTALL_DIR"
 
 info "Detecting platform..."
@@ -219,7 +238,7 @@ info "Detected target: ${target}"
 info "Installing dependencies..."
 install_dependencies
 
-is_upgrade=false 
+is_upgrade=false
 
 if [[ -f "${INSTALL_DIR}/envio" ]]; then
     is_upgrade=true
@@ -264,4 +283,3 @@ case ":$PATH:" in
 esac
 
 info "Run 'envio --help' to get started."
-
