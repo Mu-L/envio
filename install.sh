@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
+#
+# Install the envio CLI on Linux or macOS.
+#
+#   curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash
+#
+# Environment overrides:
+#   ENVIO_VERSION      tag/version to install - default: latest.
+#   ENVIO_INSTALL_DIR  install directory - default: ~/.local/bin.
+
 set -euo pipefail
 
 REPO="humblepenguinn/envio"
-INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
+INSTALL_DIR="${ENVIO_INSTALL_DIR:-${INSTALL_DIR:-$HOME/.local/bin}}"
 
 COLOR_OFF=''
 COLOR_RED=''
@@ -136,14 +145,70 @@ download_and_install() {
     chmod +x "${INSTALL_DIR}/envio"
 }
 
+install_dependencies() {
+    local os
+    os=$(uname -s)
 
-is_upgrade=false 
+    if [[ "$os" == "Darwin" ]]; then
+        command -v brew &>/dev/null || error "Homebrew (brew) is required to install dependencies on macOS. Please install Homebrew first."
+        info "Installing dependencies via brew..."
+        brew install gpgme
+        return
+    fi
 
-if [[ -f "${INSTALL_DIR}/envio" ]]; then
-    is_upgrade=true
-    installed_version=$(envio version | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
-    info "Existing installation found at ${INSTALL_DIR}/envio"
-fi
+    [[ "$os" == "Linux" ]] || error "Unsupported operating system: $os"
+    [[ -f /etc/os-release ]] || error "Unable to identify Linux distribution (no /etc/os-release). Cannot install dependencies."
+    . /etc/os-release
+
+    declare -A PKGS=(
+        [apt]="libgpgme11 libgpg-error0"
+        [dnf]="gpgme libgpg-error"
+        [pacman]="gpgme"
+        [apk]="gpgme libgpg-error"
+        [zypper]="gpgme libgpg-error"
+    )
+
+    declare -A INSTALL_CMD=(
+        [apt]="apt-get update && apt-get install -y"
+        [dnf]="dnf install -y"
+        [pacman]="pacman -S --noconfirm --needed"
+        [apk]="apk add --no-cache"
+        [zypper]="zypper --non-interactive install"
+    )
+
+    local pkg_manager=""
+    resolve_pkg_manager() {
+        case "$1" in
+            ubuntu|debian|pop|mint|elementary) pkg_manager="apt" ;;
+            fedora|rhel|centos|rocky|almalinux) pkg_manager="dnf" ;;
+            arch|manjaro|endeavouros) pkg_manager="pacman" ;;
+            alpine) pkg_manager="apk" ;;
+            opensuse*|sles) pkg_manager="zypper" ;;
+            *) return 1 ;;
+        esac
+    }
+
+    if ! resolve_pkg_manager "${ID:-}"; then
+        for like in ${ID_LIKE:-}; do
+            resolve_pkg_manager "$like" && break
+        done
+    fi
+
+    [[ -n "$pkg_manager" ]] || error "Unsupported Linux distribution: ${NAME:-Unknown}. Cannot install dependencies."
+
+    local pkg_name="${PKGS[$pkg_manager]}"
+    local install_cmd="${INSTALL_CMD[$pkg_manager]} $pkg_name"
+
+    info "Installing $pkg_name via $pkg_manager..."
+
+    local sudo_cmd=""
+    if [[ $EUID -ne 0 ]]; then
+        command -v sudo &>/dev/null || error "Root privileges are required to install dependencies. Please run this script as root or install sudo."
+        sudo_cmd="sudo"
+    fi
+
+    eval "$sudo_cmd $install_cmd"
+}
 
 mkdir -p "$INSTALL_DIR"
 
@@ -151,9 +216,28 @@ info "Detecting platform..."
 target=$(detect_target)
 info "Detected target: ${target}"
 
-info "Fetching latest version..."
-version=$(get_latest_version)
-info "Latest version: ${version}"
+info "Installing dependencies..."
+install_dependencies
+
+is_upgrade=false 
+
+if [[ -f "${INSTALL_DIR}/envio" ]]; then
+    is_upgrade=true
+    installed_version=$("${INSTALL_DIR}/envio" version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || echo "0.0.0")
+    info "Existing installation found at ${INSTALL_DIR}/envio (version ${installed_version})"
+fi
+
+if [[ -n "${ENVIO_VERSION:-}" ]]; then
+    version="$ENVIO_VERSION"
+    if [[ ! "$version" =~ ^v ]]; then
+        version="v$version"
+    fi
+    info "Using specified version: ${version}"
+else
+    info "Fetching latest version..."
+    version=$(get_latest_version)
+    info "Latest version: ${version}"
+fi
 
 if [[ "$is_upgrade" == true && "${installed_version#v}" == "${version#v}" ]]; then
     info "envio is already up to date (version ${version#v})."
@@ -173,6 +257,11 @@ if [[ "$is_upgrade" == true ]]; then
 else
     success "envio ${version} installed successfully!"
 fi
+
+case ":$PATH:" in
+    *":$INSTALL_DIR:"*) ;;
+    *) warn "note: add $INSTALL_DIR to your PATH (e.g. export PATH=\"\$PATH:$INSTALL_DIR\")" ;;
+esac
 
 info "Run 'envio --help' to get started."
 
