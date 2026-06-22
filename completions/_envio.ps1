@@ -33,6 +33,7 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('ls', 'ls', [CompletionResultType]::ParameterValue, 'List all profiles')
             [CompletionResult]::new('show', 'show', [CompletionResultType]::ParameterValue, 'Show environment variables in a profile')
             [CompletionResult]::new('check', 'check', [CompletionResultType]::ParameterValue, 'Check for expired and upcoming environment variables in a profile')
+            [CompletionResult]::new('edit', 'edit', [CompletionResultType]::ParameterValue, 'Edit a profile using your default text editor')
             [CompletionResult]::new('set', 'set', [CompletionResultType]::ParameterValue, 'Set or update environment variables in a profile')
             [CompletionResult]::new('unset', 'unset', [CompletionResultType]::ParameterValue, 'Remove environment variables from a profile')
             [CompletionResult]::new('shell', 'shell', [CompletionResultType]::ParameterValue, 'Spawn a new shell with environment variables loaded from the profile')
@@ -126,6 +127,12 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;check' {
+            [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'envio;edit' {
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')

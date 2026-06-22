@@ -7,7 +7,7 @@ use std::{
 use chrono::Local;
 use colored::Colorize;
 use comfy_table::{Attribute, Cell, Color, ContentArrangement, Table};
-use envio::{EnvMap, Profile, cipher::Cipher};
+use envio::{Env, EnvMap, Profile, cipher::Cipher};
 use indexmap::IndexMap;
 
 use crate::{
@@ -334,4 +334,135 @@ pub fn profile_expiry_table(profile: &Profile) -> AppResult<()> {
 
     println!("{table}");
     Ok(())
+}
+
+pub fn format_profile_for_editing(profile_name: &str, envs: &EnvMap) -> String {
+    let mut output = format!(
+        r#"# Profile: {profile_name}
+#
+# Edit the variables below.
+#
+# Variable format:
+#   KEY=VALUE
+#
+# Comments:
+#   One or more lines starting with '#'
+#   immediately before a variable.
+#
+# Expiration date:
+#   # expires: YYYY-MM-DD
+#   Place it immediately before the variable.
+#
+# Example:
+#   # Database credentials
+#   # Used by the production API
+#   # expires: 2027-01-01
+#   DATABASE_URL=postgres://...
+#
+# Delete a variable by removing its KEY=VALUE line.
+# To remove a comment or expiration date, delete its corresponding '#' line(s).
+# ---
+"#
+    );
+
+    for env in envs.iter() {
+        if let Some(comment) = &env.comment {
+            for line in comment.lines() {
+                output.push_str("# ");
+                output.push_str(line);
+                output.push('\n');
+            }
+        }
+        if let Some(expires) = &env.expiration_date {
+            output.push_str("# expires: ");
+            output.push_str(&expires.format("%Y-%m-%d").to_string());
+            output.push('\n');
+        }
+        output.push_str(&env.key);
+        output.push('=');
+        output.push_str(&env.value);
+        output.push_str("\n\n");
+    }
+    output
+}
+
+pub fn parse_edited_profile(content: &str) -> AppResult<EnvMap> {
+    let mut envs = EnvMap::default();
+    let mut current_comments = Vec::new();
+    let mut current_expiration = None;
+
+    for (line_idx, line) in content.lines().enumerate() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        if trimmed.starts_with('#') {
+            if trimmed.starts_with("# --") {
+                current_comments.clear();
+                current_expiration = None;
+                continue;
+            }
+
+            let comment_content = trimmed.trim_start_matches('#');
+            let trimmed_comment = comment_content.trim();
+
+            if trimmed_comment.to_lowercase().starts_with("expires:") {
+                let date_str = trimmed_comment["expires:".len()..].trim();
+                let date =
+                    chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").map_err(|_| {
+                        AppError::Msg(format!(
+                            "Line {}: Invalid expiration date format '{}'. Expected YYYY-MM-DD",
+                            line_idx + 1,
+                            date_str
+                        ))
+                    })?;
+                current_expiration = Some(date);
+            } else {
+                current_comments.push(trimmed_comment.to_string());
+            }
+            continue;
+        }
+
+        if let Some(equal_pos) = trimmed.find('=') {
+            let key = trimmed[..equal_pos].trim();
+            let value = trimmed[equal_pos + 1..].trim();
+
+            if key.is_empty() {
+                return Err(AppError::Msg(format!(
+                    "Line {}: Key cannot be empty in KEY=VALUE pair",
+                    line_idx + 1
+                )));
+            }
+
+            let comment = if current_comments.is_empty() {
+                None
+            } else {
+                Some(current_comments.join("\n"))
+            };
+
+            envs.insert(Env::new(
+                key.to_string(),
+                value.to_string(),
+                comment,
+                current_expiration,
+            ));
+
+            current_comments.clear();
+            current_expiration = None;
+        } else {
+            return Err(AppError::Msg(format!(
+                "Line {}: Invalid format. Expected KEY=VALUE or a comment line starting with '#'",
+                line_idx + 1
+            )));
+        }
+    }
+
+    if envs.is_empty() {
+        return Err(AppError::Msg(
+            "No environment variables found in the edited profile.".to_string(),
+        ));
+    }
+
+    Ok(envs)
 }

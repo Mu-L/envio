@@ -1,4 +1,7 @@
-use std::{io::Read, path::Path};
+use std::{
+    io::{Read, Write},
+    path::Path,
+};
 
 use chrono::Local;
 use colored::Colorize;
@@ -17,7 +20,9 @@ use crate::{
     completions, config,
     diagnostic::DiagnosticReport,
     error::{AppError, AppResult},
-    error_msg, ops, prompts, success_msg,
+    error_msg,
+    ops::{self, format_profile_for_editing, parse_edited_profile},
+    prompts, success_msg,
     tui::TuiApp,
     utils, warning_msg,
 };
@@ -275,6 +280,108 @@ impl ClapApp {
                 }
 
                 success_msg!("Profile created");
+            }
+
+            Command::Edit { profile_name } => {
+                let editor = std::env::var("EDITOR").map_err(|_| {
+                    AppError::Msg("EDITOR environment variable is not set. Please set it to your preferred text editor".to_string())
+                })?;
+
+                let editor_parts: Vec<String> =
+                    editor.split_whitespace().map(|s| s.to_string()).collect();
+                if editor_parts.is_empty() {
+                    return Err(AppError::Msg("No text editor found".to_string()));
+                }
+                let program = &editor_parts[0];
+                let args = &editor_parts[1..];
+
+                let mut profile = get_profile_cli(profile_name)?;
+                let initial_content = format_profile_for_editing(profile_name, &profile.envs);
+
+                let temp_dir = std::env::temp_dir();
+                let temp_file_name = format!("envio-edit-{}.txt", uuid::Uuid::new_v4());
+                let temp_file_path = temp_dir.join(temp_file_name);
+
+                struct TempFileGuard {
+                    path: std::path::PathBuf,
+                }
+
+                impl Drop for TempFileGuard {
+                    fn drop(&mut self) {
+                        if self.path.exists() {
+                            if let Ok(metadata) = std::fs::metadata(&self.path) {
+                                let len = metadata.len();
+                                if len > 0 {
+                                    let zeroes = vec![0; len as usize];
+                                    let _ = std::fs::write(&self.path, zeroes);
+                                }
+                            }
+                            let _ = std::fs::remove_file(&self.path);
+                        }
+                    }
+                }
+
+                let _guard = TempFileGuard {
+                    path: temp_file_path.clone(),
+                };
+
+                let mut opts = std::fs::OpenOptions::new();
+                opts.write(true).create(true).truncate(true);
+
+                #[cfg(target_family = "unix")]
+                {
+                    use std::os::unix::fs::OpenOptionsExt;
+                    opts.mode(0o600);
+                }
+
+                let mut file = opts.open(&temp_file_path)?;
+                file.write_all(initial_content.as_bytes())?;
+
+                loop {
+                    let mut cmd = std::process::Command::new(program);
+                    cmd.args(args).arg(&temp_file_path);
+
+                    let mut child = cmd
+                        .stdin(std::process::Stdio::inherit())
+                        .stdout(std::process::Stdio::inherit())
+                        .stderr(std::process::Stdio::inherit())
+                        .spawn()
+                        .map_err(|e| AppError::Msg(format!("Failed to spawn editor: {}", e)))?;
+
+                    let status = child
+                        .wait()
+                        .map_err(|e| AppError::Msg(format!("Failed to wait on editor: {}", e)))?;
+
+                    if !status.success() {
+                        return Err(AppError::Msg(format!(
+                            "Editor exited with error code: {}",
+                            status.code().unwrap_or(1)
+                        )));
+                    }
+
+                    let edited_content = std::fs::read_to_string(&temp_file_path)?;
+                    match parse_edited_profile(&edited_content) {
+                        Ok(new_envs) => {
+                            profile.envs = new_envs;
+                            profile.save()?;
+                            success_msg!("Changes applied");
+                            break;
+                        }
+                        Err(e) => {
+                            error_msg!("{}", e);
+                            let choice = prompts::select_prompt(prompts::SelectPromptOptions {
+                                title: "How would you like to proceed?".to_string(),
+                                options: vec![
+                                    "Re-edit the file".to_string(),
+                                    "Abort (discard changes)".to_string(),
+                                ],
+                            })?;
+                            if choice == "Abort (discard changes)" {
+                                return Err(AppError::Msg("Edit aborted".to_string()));
+                            }
+                        }
+                    }
+                }
             }
 
             Command::Set {

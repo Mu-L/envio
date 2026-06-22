@@ -118,6 +118,16 @@ pub enum Command {
     },
 
     #[command(
+        name = "edit",
+        about = "Edit a profile using your default text editor",
+        override_usage = "envio edit <PROFILE_NAME>"
+    )]
+    Edit {
+        #[arg(required = true, help = "name of the profile")]
+        profile_name: String,
+    },
+
+    #[command(
         name = "set",
         about = "Set or update environment variables in a profile",
         override_usage = "envio set <PROFILE_NAME> <ENVS>... [OPTIONS]"
