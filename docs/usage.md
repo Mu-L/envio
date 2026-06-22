@@ -394,6 +394,18 @@ To remove a profile encryption key from the keyring:
 envio remove-key <PROFILE_NAME>
 ```
 
+### Rotating Encryption Keys
+
+Re-encrypt a profile under a new key/passphrase without manual export and re-import:
+
+```bash
+envio rotate-key <PROFILE_NAME>
+```
+
+This will decrypt the profile using the current key, prompt you for the new key (or generate a new symmetric key depending on the encryption method), and re-encrypt the profile under the new key. 
+
+If the encryption method supports storing keys in the system keyring, you'll also be prompted whether you want to save the new key in the keyring.
+
 ### Interactive TUI
 
 Launch the interactive terminal user interface:
