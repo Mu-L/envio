@@ -1,11 +1,11 @@
 mod clap_app;
-mod commands;
+mod cmd;
 mod completions;
 mod config;
 mod diagnostic;
 mod error;
 mod log_macros;
-mod ops;
+mod profile_ops;
 mod prompts;
 mod tui;
 mod utils;

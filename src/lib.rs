@@ -18,7 +18,7 @@ use crate::{
 pub fn get_profile<P, F>(file_path: P, key_provider: Option<F>) -> Result<Profile>
 where
     P: AsRef<Path>,
-    F: FnOnce(&ProfileMetadata) -> Zeroizing<String>,
+    F: FnOnce(&ProfileMetadata) -> Result<Zeroizing<String>>,
 {
     let file_path = file_path.as_ref().to_path_buf();
 
@@ -37,7 +37,7 @@ where
             Error::Msg("Key provider is required for profiles using encryption".into())
         })?;
 
-        let key = key_provider(&serialized_profile.metadata);
+        let key = key_provider(&serialized_profile.metadata)?;
 
         match cipher.kind() {
             CipherKind::PASSPHRASE => cipher
@@ -78,7 +78,7 @@ where
 pub fn load_profile<P, F>(file_path: P, key_provider: Option<F>) -> Result<Profile>
 where
     P: AsRef<Path>,
-    F: FnOnce(&ProfileMetadata) -> Zeroizing<String>,
+    F: FnOnce(&ProfileMetadata) -> Result<Zeroizing<String>>,
 {
     let file_path = file_path.as_ref().to_path_buf();
     let profile = get_profile(file_path, key_provider)?;

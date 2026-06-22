@@ -128,7 +128,9 @@ impl TuiApp {
                     let path = get_profile_path(name)?;
                     if let Ok(profile) = envio::get_profile(
                         path,
-                        Some(|_: &envio::ProfileMetadata| zeroize::Zeroizing::new(pwd)),
+                        Some(|_: &envio::ProfileMetadata| {
+                            Ok::<Zeroizing<String>, envio::error::Error>(pwd.into())
+                        }),
                     ) {
                         self.navigation.push(ScreenId::Edit(Box::new(profile)))?;
                         return Ok(());
@@ -148,7 +150,7 @@ impl TuiApp {
         let path = get_profile_path(name)?;
         let profile = envio::get_profile(
             path,
-            None::<fn(&envio::ProfileMetadata) -> Zeroizing<String>>,
+            None::<fn(&envio::ProfileMetadata) -> Result<Zeroizing<String>, envio::error::Error>>,
         )?;
 
         self.navigation.push(ScreenId::Edit(Box::new(profile)))?;

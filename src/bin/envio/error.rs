@@ -43,4 +43,10 @@ pub enum AppError {
     Msg(String),
 }
 
+impl From<AppError> for envio::error::Error {
+    fn from(e: AppError) -> Self {
+        Self::Msg(e.to_string())
+    }
+}
+
 pub type AppResult<T> = std::result::Result<T, AppError>;

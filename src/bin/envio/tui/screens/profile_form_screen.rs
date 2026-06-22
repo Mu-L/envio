@@ -18,7 +18,7 @@ use super::{Action, Screen, ScreenEvent, ScreenId};
 use crate::{
     config::{build_profile_path, get_profile_metadata, get_profile_path},
     error::AppResult,
-    ops,
+    profile_ops,
 };
 
 enum Status {
@@ -553,7 +553,7 @@ impl CreateProfileScreen {
         let description = self.description.trim().to_string();
         let cipher_kind = self.get_selected_cipher_kind();
         self.save_handle = Some(thread::spawn(move || {
-            ops::create_profile(
+            profile_ops::create_profile(
                 name,
                 Some(description),
                 EnvMap::default(),

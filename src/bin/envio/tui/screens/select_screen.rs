@@ -429,7 +429,7 @@ impl SelectScreen {
         match key.code {
             KeyCode::Char('y') | KeyCode::Char('Y') => {
                 self.delete_confirmation = None;
-                crate::ops::delete_profile(&profile_name)?;
+                crate::profile_ops::delete_profile(&profile_name)?;
                 self.load_profiles()?;
                 self.update_filter();
                 if !self.filtered_profiles.is_empty() {

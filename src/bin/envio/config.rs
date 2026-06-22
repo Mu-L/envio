@@ -42,3 +42,29 @@ pub fn get_profile_metadata(profile_name: &str) -> AppResult<ProfileMetadata> {
     let serialized_profile: SerializedProfile = envio::utils::get_serialized_profile(path)?;
     Ok(serialized_profile.metadata)
 }
+
+pub fn collect_profile_names() -> AppResult<Vec<String>> {
+    let profile_dir = get_profile_dir()?;
+    let mut profiles = Vec::new();
+
+    if !profile_dir.exists() {
+        return Ok(profiles);
+    }
+
+    for entry in std::fs::read_dir(&profile_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.extension().and_then(|s| s.to_str()) != Some("envio") {
+            continue;
+        }
+
+        if let Some(name) = path.file_stem().and_then(|s| s.to_str())
+            && !name.starts_with('.')
+        {
+            profiles.push(name.to_owned());
+        }
+    }
+
+    Ok(profiles)
+}
