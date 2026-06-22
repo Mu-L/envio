@@ -173,7 +173,7 @@ info "Detected target: ${target}"
 if command -v gpg &>/dev/null; then
     info "gpg already installed ($(gpg --version | head -1))"
 else
-    warn "note: gpg was not found on your system. Please install it if you plan to use gpg encryption"
+    warn "Note: gpg was not found on your system. Please install it if you plan to use gpg encryption"
 fi
 
 is_upgrade=false

@@ -236,6 +236,29 @@ envio unset <PROFILE_NAME> API_KEY
 envio unset <PROFILE_NAME> API_KEY DATABASE_URL
 ```
 
+#### Editing a Profile in Your Text Editor
+
+Open a profile for free-form editing in your `$EDITOR`:
+
+```bash
+envio edit <PROFILE_NAME>
+```
+
+This decrypts the profile, writes it to a secure temporary file (mode `0600` on Unix), and opens it in whatever editor is set in `$EDITOR`. The file format uses plain `KEY=VALUE` lines with optional comment and expiration annotations.
+
+When you save and close the editor:
+
+- If the file parses correctly the profile is re-encrypted and saved.
+- If there is a parse error, you will be shown the error and given the choice to **re-open the editor** or **abort** (discarding all changes).
+
+The temporary file is securely zeroed and deleted on exit regardless of outcome.
+
+> [!IMPORTANT]
+> `$EDITOR` must be set in your environment. If it is not set, `envio edit` will return an error. Set it in your shell profile, for example: `export EDITOR=nvim`
+
+> [!WARNING]
+> The plaintext values are written to a temporary file while the editor is open. On Unix systems the file is created with `0600` permissions (owner read/write only). Avoid using `edit` on a shared or untrusted system.
+
 ### Checking Variable Expiry
 
 To check for expired or upcoming environment variables in a profile, use the `check` command:
