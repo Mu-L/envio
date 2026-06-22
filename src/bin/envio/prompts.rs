@@ -1,11 +1,58 @@
 use std::{env, path::Path};
 
+use colored::Colorize;
+use envio::cipher::CipherKind;
 use inquire::{
     Confirm, DateSelect, MultiSelect, Password, PasswordDisplayMode, Select, Text, min_length,
 };
 use regex::Regex;
+use strum::IntoEnumIterator;
 
 use crate::error::AppResult;
+
+#[derive(Clone, PartialEq)]
+pub enum CipherChoice {
+    Kind(CipherKind),
+    GpgNotInstalled,
+}
+
+impl std::fmt::Display for CipherChoice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CipherChoice::Kind(kind) => write!(f, "{}", kind.to_string().to_lowercase()),
+            CipherChoice::GpgNotInstalled => write!(f, "gpg (not installed)"),
+        }
+    }
+}
+
+pub fn select_cipher_kind_prompt() -> AppResult<CipherKind> {
+    let has_gpg = envio::cipher::gpg::check_gpg().is_ok();
+    let mut options = Vec::new();
+    for kind in CipherKind::iter() {
+        if kind == CipherKind::GPG && !has_gpg {
+            options.push(CipherChoice::GpgNotInstalled);
+        } else {
+            options.push(CipherChoice::Kind(kind));
+        }
+    }
+
+    loop {
+        let selected = select_prompt(SelectPromptOptions {
+            title: "Select the encryption method:".to_string(),
+            options: options.clone(),
+        })?;
+
+        match selected {
+            CipherChoice::Kind(kind) => return Ok(kind),
+            CipherChoice::GpgNotInstalled => {
+                println!(
+                    "{}",
+                    "gpg is not installed, please install gpg or choose another method.".red()
+                );
+            }
+        }
+    }
+}
 
 pub struct ConfirmPromptOptions {
     pub title: String,

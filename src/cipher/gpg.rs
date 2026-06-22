@@ -10,7 +10,7 @@ use crate::{
     error::{Error, Result},
 };
 
-fn check_gpg() -> Result<()> {
+pub fn check_gpg() -> Result<()> {
     match Command::new("gpg").arg("--version").output() {
         Ok(_) => Ok(()),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Err(Error::Cipher(

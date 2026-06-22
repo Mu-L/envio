@@ -98,6 +98,7 @@ fn draw_footer(frame: &mut Frame, area: Rect, text: &str) {
     );
 }
 
+#[derive(PartialEq, Eq)]
 enum CreateField {
     Name,
     Description,
@@ -108,7 +109,6 @@ enum CreateField {
 enum KeySubField {
     Passphrase,
     PassphraseConfirm,
-    Gpg,
 }
 
 pub struct CreateProfileScreen {
@@ -125,6 +125,7 @@ pub struct CreateProfileScreen {
     status: Status,
     save_handle: Option<JoinHandle<AppResult<()>>>,
     generated_key: Option<Zeroizing<String>>,
+    has_gpg: bool,
 }
 
 impl Screen for CreateProfileScreen {
@@ -266,7 +267,6 @@ impl Screen for CreateProfileScreen {
                         KeySubField::PassphraseConfirm => {
                             self.move_to_next_field();
                         }
-                        _ => {}
                     },
 
                     KeyCode::BackTab => match self.key_sub_field {
@@ -276,7 +276,6 @@ impl Screen for CreateProfileScreen {
                         KeySubField::Passphrase => {
                             self.move_to_previous_field();
                         }
-                        _ => {}
                     },
 
                     KeyCode::Char('s')
@@ -294,7 +293,6 @@ impl Screen for CreateProfileScreen {
                         KeySubField::PassphraseConfirm => {
                             self.passphrase_confirm.push(c);
                         }
-                        _ => {}
                     },
 
                     KeyCode::Backspace => match self.key_sub_field {
@@ -304,7 +302,6 @@ impl Screen for CreateProfileScreen {
                         KeySubField::PassphraseConfirm => {
                             self.passphrase_confirm.pop();
                         }
-                        _ => {}
                     },
 
                     KeyCode::Esc => return Ok(Action::Back),
@@ -382,7 +379,12 @@ impl CreateProfileScreen {
             list_state.select(Some(0));
         }
 
-        let gpg_keys = get_gpg_keys()?;
+        let has_gpg = envio::cipher::gpg::check_gpg().is_ok();
+        let gpg_keys = if has_gpg {
+            get_gpg_keys().unwrap_or_default()
+        } else {
+            Vec::new()
+        };
         let mut gpg_key_list_state = ListState::default();
         if !gpg_keys.is_empty() {
             gpg_key_list_state.select(Some(0));
@@ -402,6 +404,7 @@ impl CreateProfileScreen {
             status: Status::Idle,
             save_handle: None,
             generated_key: None,
+            has_gpg,
         })
     }
 
@@ -413,15 +416,20 @@ impl CreateProfileScreen {
     }
 
     fn move_to_next_field(&mut self) {
+        if self.current_field == CreateField::CipherKind
+            && self.get_selected_cipher_kind() == CipherKind::GPG
+            && !self.has_gpg
+        {
+            self.status = Status::Error("gpg is not installed on your system".to_string());
+            return;
+        }
+
         self.current_field = match self.current_field {
             CreateField::Name => CreateField::Description,
             CreateField::Description => CreateField::CipherKind,
             CreateField::CipherKind => {
                 if self.needs_key_input() {
-                    self.key_sub_field = match self.get_selected_cipher_kind() {
-                        CipherKind::GPG => KeySubField::Gpg,
-                        _ => KeySubField::Passphrase,
-                    };
+                    self.key_sub_field = KeySubField::Passphrase;
                     CreateField::Key
                 } else {
                     CreateField::Name
@@ -471,13 +479,11 @@ impl CreateProfileScreen {
         let new = (current + delta).clamp(0, self.cipher_kinds.len() as i32 - 1) as usize;
         self.cipher_kind_list_state.select(Some(new));
 
-        if matches!(self.get_selected_cipher_kind(), CipherKind::GPG) {
-            self.key_sub_field = KeySubField::Gpg;
-        } else {
+        if !matches!(self.get_selected_cipher_kind(), CipherKind::PASSPHRASE) {
             self.passphrase.clear();
             self.passphrase_confirm.clear();
-            self.key_sub_field = KeySubField::Passphrase;
         }
+        self.key_sub_field = KeySubField::Passphrase;
     }
 
     fn move_gpg_selection(&mut self, delta: i32) {
@@ -498,6 +504,11 @@ impl CreateProfileScreen {
 
         if self.name.trim().contains(' ') {
             self.status = Status::Error("Profile name cannot contain spaces".to_string());
+            return Ok(());
+        }
+
+        if self.get_selected_cipher_kind() == CipherKind::GPG && !self.has_gpg {
+            self.status = Status::Error("GPG is not installed on your system".to_string());
             return Ok(());
         }
 
@@ -605,14 +616,24 @@ impl CreateProfileScreen {
                     Style::default().fg(Color::White)
                 };
 
-                let cipher_color = match kind {
-                    CipherKind::PASSPHRASE => Color::Yellow,
-                    CipherKind::SYMMETRIC => Color::Magenta,
-                    CipherKind::GPG => Color::Green,
-                    CipherKind::NONE => Color::Blue,
+                let text = if *kind == CipherKind::GPG && !self.has_gpg {
+                    format!("{} (not installed)", kind)
+                } else {
+                    kind.to_string()
                 };
 
-                let line = vec![Span::styled(kind.to_string(), style.fg(cipher_color))];
+                let cipher_color = if *kind == CipherKind::GPG && !self.has_gpg {
+                    Color::DarkGray
+                } else {
+                    match kind {
+                        CipherKind::PASSPHRASE => Color::Yellow,
+                        CipherKind::SYMMETRIC => Color::Magenta,
+                        CipherKind::GPG => Color::Green,
+                        CipherKind::NONE => Color::Blue,
+                    }
+                };
+
+                let line = vec![Span::styled(text, style.fg(cipher_color))];
 
                 ListItem::new(Line::from(line))
             })

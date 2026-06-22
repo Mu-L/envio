@@ -23,7 +23,7 @@ where
     let file_path = file_path.as_ref().to_path_buf();
 
     let serialized_profile = utils::get_serialized_profile(&file_path)?;
-    let mut cipher = crate::cipher::create_cipher(serialized_profile.metadata.cipher_kind, None)?;
+    let mut cipher = cipher::create_cipher(serialized_profile.metadata.cipher_kind, None)?;
 
     if let Some(cipher_metadata) = &serialized_profile.metadata.cipher_metadata {
         cipher.import_metadata(cipher_metadata.clone())?;
