@@ -8,6 +8,7 @@ pub mod import;
 pub mod init;
 pub mod keyring;
 pub mod list;
+pub mod rotate_key;
 pub mod run;
 pub mod set;
 pub mod shell;
@@ -87,6 +88,7 @@ impl ClapApp {
             } => import::run(source, profile_name.as_deref()),
             Command::AddKey { profile_name } => keyring::add_key(profile_name),
             Command::RemoveKey { profile_name } => keyring::remove_key(profile_name),
+            Command::RotateKey { profile_name } => rotate_key::run(profile_name),
             Command::Shell { profile_name } => shell::run(profile_name),
             Command::Run {
                 profile_name,

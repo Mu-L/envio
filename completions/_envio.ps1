@@ -42,6 +42,7 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('export', 'export', [CompletionResultType]::ParameterValue, 'Export the environment variables of a profile to a file')
             [CompletionResult]::new('add-key', 'add-key', [CompletionResultType]::ParameterValue, 'Add a profile encryption key to the keyring')
             [CompletionResult]::new('remove-key', 'remove-key', [CompletionResultType]::ParameterValue, 'Remove a profile encryption key from the keyring')
+            [CompletionResult]::new('rotate-key', 'rotate-key', [CompletionResultType]::ParameterValue, 'Rotate the encryption key of a profile')
             [CompletionResult]::new('tui', 'tui', [CompletionResultType]::ParameterValue, 'Launch the interactive TUI application')
             [CompletionResult]::new('completion', 'completion', [CompletionResultType]::ParameterValue, 'Show shell completion for the provided shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Print version information')
@@ -193,6 +194,12 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;remove-key' {
+            [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'envio;rotate-key' {
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')

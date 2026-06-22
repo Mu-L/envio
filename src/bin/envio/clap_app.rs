@@ -254,6 +254,16 @@ pub enum Command {
     },
 
     #[command(
+        name = "rotate-key",
+        about = "Rotate the encryption key of a profile",
+        override_usage = "envio rotate-key <PROFILE_NAME>"
+    )]
+    RotateKey {
+        #[arg(required = true, help = "name of the profile")]
+        profile_name: String,
+    },
+
+    #[command(
         name = "tui",
         about = "Launch the interactive TUI application",
         override_usage = "envio tui"
