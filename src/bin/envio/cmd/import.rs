@@ -51,7 +51,7 @@ fn download_profile(url: &str, profile_name: &str) -> AppResult<()> {
         .enable_all()
         .build()?;
 
-    runtime.block_on(download_file(url, location.to_str().unwrap()))?;
+    runtime.block_on(download_file(url, &location))?;
     Ok(())
 }
 

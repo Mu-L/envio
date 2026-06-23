@@ -16,7 +16,9 @@ struct CacheData {
 
 fn get_cache_file() -> AppResult<PathBuf> {
     let app_name = env!("CARGO_PKG_NAME");
-    let dir = cache_dir().unwrap().join(app_name);
+    let dir = cache_dir()
+        .unwrap_or_else(|| std::env::temp_dir())
+        .join(app_name);
 
     if !dir.exists() {
         create_dir_all(&dir)?;

@@ -57,8 +57,9 @@ pub fn run(
         .unwrap_or(false);
 
         if store
+            && let Some(ref k) = key
             && let Ok(entry) = keyring::Entry::new("envio", &profile.metadata.uuid)
-            && let Err(e) = entry.set_password(&key.unwrap())
+            && let Err(e) = entry.set_password(k)
         {
             error_msg!("Failed to store key in keyring: {}", e);
         }

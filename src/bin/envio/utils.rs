@@ -28,7 +28,7 @@ pub fn parse_envs_from_string(buffer: &str) -> AppResult<EnvMap> {
     Ok(envs_vec)
 }
 
-pub async fn download_file(url: &str, file_name: &str) -> AppResult<()> {
+pub async fn download_file(url: &str, path: impl AsRef<std::path::Path>) -> AppResult<()> {
     let client = Client::new();
 
     let pb = ProgressBar::new_spinner();
@@ -41,7 +41,7 @@ pub async fn download_file(url: &str, file_name: &str) -> AppResult<()> {
     );
 
     let mut resp = client.get(url).send().await?;
-    let mut file = File::create(file_name)?;
+    let mut file = File::create(path)?;
 
     let content_length = resp
         .content_length()
