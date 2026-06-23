@@ -8,6 +8,7 @@ use envio::{
 use zeroize::Zeroizing;
 
 use crate::{
+    config,
     error::{AppError, AppResult},
     error_msg, profile_ops, prompts, success_msg, utils,
 };
@@ -21,6 +22,8 @@ pub fn run(
     add_comments: bool,
     add_expires: bool,
 ) -> AppResult<()> {
+    config::get_profile_dir()?;
+
     let selected_cipher_kind = if let Some(kind) = cipher_kind {
         kind.parse::<CipherKind>()
             .map_err(|e| AppError::Msg(e.to_string()))?
