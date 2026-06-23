@@ -25,12 +25,16 @@ Some key features of `envio` include:
 - **Encrypt** profiles using different encryption methods
 - **Start** new shell sessions with profile environment variables injected
 - **Run** programs with your profiles
+- And more!
 
 ## Installation
 
 Pre-built binaries for Linux, macOS, and Windows are available on the [releases page](https://github.com/humblepenguinn/envio/releases).
 
-### Unix Install Script
+### Install Script
+
+This script only supports Linux and macOS. 
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.sh | bash
 ```
@@ -51,13 +55,14 @@ curl -fsSL https://raw.githubusercontent.com/humblepenguinn/envio/main/install.s
 cargo install envio
 ```
 
-### Arch Linux
+### Linux
+#### Arch Linux
 Use your favorite AUR helper:
 ```bash
 paru -S envio      # or envio-bin for pre-built binary
 ```
 
-### Debian/Ubuntu
+#### Debian/Ubuntu
 A `.deb` package is also published on the [releases page](https://github.com/envio-cli/envio/releases):
 ```bash
 sudo dpkg -i envio_<version>_<arch>.deb
