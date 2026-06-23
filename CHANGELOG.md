@@ -1,5 +1,20 @@
 # Change Log
 
+# v0.8.0
+
+## Features
+- **Interactive Profile Editing** (`edit` command) — easily modify a profile's environment variables, comments, and expiration dates interactively in your preferred text editor (defined via `$EDITOR`).
+- **Key Rotation** (`rotate-key` command) — rotate encryption keys for existing profiles.
+- **Checking Profile Envs** (`check` command) — check profile variables and identify which ones have expired.
+- **Auto-Filtering of Expired Envs** — automatically filter out expired environment variables when loading profiles.
+- **Replaced gpgme crate** — replaced the dependency with direct calls to the system `gpg` CLI, removing the need for the `gpgme` library and simplifying cross-platform installation. GPG encryption is automatically disabled if `gpg` is not installed on the system.
+- **Multi-Format Export Support** — export profiles in multiple formats, including dotenv, JSON, YAML, and Shell script.
+
+## Other
+- **Uninstall Support** — added uninstall support to the install script.
+- **Upgraded Dependencies** — bumped dependency versions.
+- **Makefile** — added a `Makefile` to simplify common development commands.
+
 # v0.7.0
 
 > [!WARNING]
