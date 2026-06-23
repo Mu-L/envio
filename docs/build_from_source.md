@@ -8,9 +8,9 @@
 
    If Rust is not installed, follow the instructions on the [Official Rust website](https://www.rust-lang.org/tools/install).
 
-2. **Install dependencies (Unix only):**
+2. **Install dependencies:**
 
-   Ensure the `gpg` CLI tool (GnuPG) is installed.
+   Ensure the `gpg` CLI tool (GnuPG) is installed if you plan to use `gpg` encryption.
 
 3. **Clone the repository:**
 
