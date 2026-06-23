@@ -60,6 +60,11 @@ pub fn create_profile(
 }
 
 pub fn delete_profile(profile_name: &str) -> AppResult<()> {
+    if let Ok(metadata) = config::get_profile_metadata(profile_name) {
+        if let Ok(entry) = keyring::Entry::new("envio", &metadata.uuid) {
+            let _ = entry.delete_credential();
+        }
+    }
     std::fs::remove_file(get_profile_path(profile_name)?)?;
     Ok(())
 }
