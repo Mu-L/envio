@@ -1,10 +1,4 @@
 <div align="center">
-  <a href="https://irusa.org/middle-east/palestine/">
-    <img src="assets/palestine-banner.png" width="800px">
-  </a>
-</div>
-
-<div align="center">
   <img src="assets/icon.svg" width="200px">
   <h1>envio</h1>
 </div>
@@ -13,6 +7,9 @@
   <h2>A secure command-line tool for managing environment variables</h2>
   <a href="https://github.com/humblepenguinn/envio/workflows/CICD.yml"><img src="https://github.com/humblepenguinn/envio/actions/workflows/CICD.yml/badge.svg" alt="CICD"></a>
   <a href="https://crates.io/crates/envio"><img src="https://img.shields.io/crates/v/envio.svg" alt="Version info"></a>
+  <a href="https://www.pcrf.net/">
+    <img src="https://img.shields.io/badge/Support-Palestine-00b03f.svg?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNiAzIj48cmVjdCBmaWxsPSIjMDA5NjM5IiB3aWR0aD0iNiIgaGVpZ2h0PSIzIi8+PHJlY3QgZmlsbD0iI0ZGRiIgd2lkdGg9IjYiIGhlaWdodD0iMiIvPjxyZWN0IHdpZHRoPSI2IiBoZWlnaHQ9IjEiLz48cGF0aCBmaWxsPSIjRUQyRTM4IiBkPSJNMCwwbDIsMS41TDAsM1oiLz48L3N2Zz4%3D" />
+  </a>
 </div>
 
 <div align="center" style="margin-top: 24px; margin-bottom: 24px;">
